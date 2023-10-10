@@ -1,0 +1,49 @@
+.boards{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    text-align: center;
+    > div {
+        border-radius: 5px;
+        min-height: 300px;
+    }
+    h2{
+        padding: 10px;
+    }
+    .to_do{
+        background-color: lightblue;
+    }
+    .in_progress{
+        background-color: cadetblue;
+    }
+    .completed{
+        background-color: lightgreen;
+    }
+}
+
+.add-item{
+    display: grid;
+    grid-template-columns: 30% 50% 20%;
+    width: 60%;
+    margin: 10px auto;
+    > * {
+        margin: 10px;
+        border-radius: 5px;
+        border: 1px solid darkcyan;
+        text-align: center;
+    }
+    input{
+        padding: 10px 0;
+    }
+    button{
+        background-color: darkcyan;
+        &:hover{
+            cursor: pointer;
+        }
+    }   
+}
+
+.error{
+    color: red;
+    text-align: center;
+}
