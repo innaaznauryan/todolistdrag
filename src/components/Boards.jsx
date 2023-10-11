@@ -1,44 +1,44 @@
 import {useState} from "react"
-import Edit from "./Edit"
-import Delete from "./Delete"
+import {v4 as uuidv4} from 'uuid'
 import List from "./List"
 import "./boards.scss"
 
-const Boards = () => {
+const INITIALBOARDS = [
+    {
+        id: uuidv4(),
+        name: "To do",
+        status: "to_do",
+        items: []
+    },
+    {
+        id: uuidv4(),
+        name: "In progress",
+        status: "in_progress",
+        items: []
+    },
+    {
+        id: uuidv4(),
+        name: "Completed",
+        status: "completed",
+        items: []
+    }
+]
 
+const Boards = () => {
     const [currentId, setCurrentId] = useState(() => {
         let ID
         if(!localStorage.getItem("currentId")) {
-            ID = 1
+            ID = uuidv4()
             localStorage.setItem("currentId", ID)
         } else {
-            ID = +localStorage.getItem("currentId")
+            ID = localStorage.getItem("currentId")
         }
         return ID
     })
     const [boards, setBoards] = useState(() => {
         let BOARDS
         if (!localStorage.getItem("boards")) {
-            BOARDS = [
-                {
-                    id: "board-1",
-                    name: "To do",
-                    status: "to_do",
-                    items: []
-                },
-                {
-                    id: "board-2",
-                    name: "In progress",
-                    status: "in_progress",
-                    items: []
-                },
-                {
-                    id: "board-3",
-                    name: "Completed",
-                    status: "completed",
-                    items: []
-                }
-            ]
+            BOARDS = INITIALBOARDS
             localStorage.setItem("boards", JSON.stringify(BOARDS))
         } else {
             BOARDS = JSON.parse(localStorage.getItem("boards"))
@@ -47,24 +47,14 @@ const Boards = () => {
     })
 
     const [error, setError] = useState(null)
-    const [editMode, setEditMode] = useState({mode: false, id: null})
-    const [deleteMode, setDeleteMode] = useState({mode: false, id: null})
 
-    function format (string) {
-        return string.trim().replace(/\s+/g, " ")
-    }
     function stringValidate (...strings) {
-        if(strings.some(string => !format(string))) {
+        if(strings.some(string => !string.trim().replace(/\s+/g, " "))) {
             setError("Please fill the form!")
             setTimeout(() => {
                 setError(null)
             }, 2000);
             throw new Error("empty value")
-        }
-    }
-    function numValidate(num) {
-        if(!Number.isFinite(num)) {
-            throw new Error("wrong datatype")
         }
     }
 
@@ -77,13 +67,18 @@ const Boards = () => {
                 id: currentId,
                 ...Object.fromEntries([...new FormData(e.target)])
             }
-            const boardsCopy = [...boards]
-            const bordIndex = boardsCopy.findIndex(board => board.status === "to_do")
-            boardsCopy[bordIndex].items.push(newItem)
-            localStorage.setItem("boards", JSON.stringify(boardsCopy))
-            localStorage.setItem("currentId", currentId + 1)
-            setBoards(boardsCopy)
-            setCurrentId(prev => prev + 1)
+
+            setBoards(prev => {
+                return prev.map(board => board.status === "to_do" ? {...board, items: [...board.items,newItem]} : board)
+            })
+            localStorage.setItem("boards", JSON.stringify(((boards)=>{
+                return boards.map(board => board.status === "to_do" ? {...board, items: [...board.items,newItem]} : board)
+            })(boards)))
+
+            const newId = uuidv4()
+            localStorage.setItem("currentId", newId)
+            setCurrentId(newId)
+
         } catch (error) {
             console.log(error)
         } finally {
@@ -91,52 +86,42 @@ const Boards = () => {
         }
     }
 
-
-
-    
-    // const editItem = (id, title, description) => {
-    //     try {
-    //         numValidate(id)
-    //         stringValidate(title, description)
-    //         const updatedItem = {id, title, description, status: "to-do"}
-    //         const updatedList = list.with(list.findIndex(item => item.id === id), updatedItem)
-    //         setList(updatedList)
-    //         localStorage.setItem("list", JSON.stringify(updatedList))
-    //     } catch (error) {
-    //         console.log(error)
-    //     } finally {
-    //         setEditMode({mode: false, id: null})
-    //     }
-    // }
-
-    // const deleteItem = (id) => {
-    //     try {
-    //         numValidate(id)
-    //         const updatedList = list.filter(item => item.id != id)
-    //         setList(updatedList)
-    //         localStorage.setItem("list", updatedList)
-    //         setDeleteMode({mode: false, id: null})
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
+    const addBoard = (e) => {
+        e.preventDefault()
+        const {status} = e.target
+        try {
+            stringValidate(status.value)
+            const newBoard = {
+                id: uuidv4(),
+                name: status.value,
+                status: status.value.split(" ").join("_").toLowerCase(),
+                items: []
+            }
+            setBoards(prev => [...prev, newBoard])
+            localStorage.setItem("boards", JSON.stringify((boards => [...boards, newBoard])(boards)))
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
   return (
 <>
     <div className="boards">
         {boards.map(({id, name, status}) => {
-            return <List key={id} name={name} status={status} boards={boards} setBoards={setBoards} setEditMode={setEditMode} setDeleteMode={setDeleteMode} />
+            return <List key={id} name={name} status={status} boards={boards} setBoards={setBoards} stringValidate={stringValidate} />
         })}
     </div>
     <form className="add-item" onSubmit={addItem}>
         <input type="text" name="title" id="title" placeholder="Title" required/>
         <input type="text" name="description" id="description" placeholder="Description" required/>
-        <button type="submit">Add</button>
+        <button type="submit">Add Item</button>
+    </form>
+    <form className="add-board" onSubmit={addBoard}>
+        <input type="text" name="status" id="status" placeholder="Status" required />
+        <button type="submit">Add Board</button>
     </form>
 
-    {error && <p className="error">{error}</p>}
-    {/* {editMode.mode && <Edit list={list} id={editMode.id} setEditMode={setEditMode} editItem={editItem} error={error} />}
-    {deleteMode.mode && <Delete list={list} id={deleteMode.id} setDeleteMode={setDeleteMode} deleteItem={deleteItem} />} */}
+    <p className="error">{error || ""}</p>
 </>
   )
 }

@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import {useState} from 'react'
 
-const Edit = ({list, id, setEditMode, editItem, error}) => {
+const Edit = ({boards, setBoards, id, status, setEditMode, stringValidate}) => {
 
     const [editInfo, setEditInfo] = useState(() => {
-        const itemToEdit = list.find(item => item.id === id)
+        const itemToEdit = boards.find(board => board.status === status).items.find(item => item.id === id)
         return {
             editTitle: itemToEdit.title,
             editDescription: itemToEdit.description
@@ -18,18 +18,36 @@ const Edit = ({list, id, setEditMode, editItem, error}) => {
         editItem(id, e.target.editTitle.value, e.target.editDescription.value)
     }
 
+    const editItem = (id, title, description) => {
+        try {
+            stringValidate(id, title, description)
+            const updatedItem = {id, title, description}
+            setBoards(prev => {
+              return prev.map(board => board.status === status ? {...board, items: board.items.map(item => item.id === id ? updatedItem : item)} : board)
+            })
+            localStorage.setItem("boards", JSON.stringify((boards => {
+              return boards.map(board => board.status === status ? {...board, items: board.items.map(item => item.id === id ? updatedItem : item)} : board)
+            })(boards)))
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setEditMode({mode: false, id: null, status: null})
+        }
+      }
+
   return (
     <>
     <div className="veil"></div>
     <div className="modal">
         <h1>Edit</h1>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className='flex'>
             <input onChange={handleEditChange} type="text" name="editTitle" id='editTitle' value={editInfo.editTitle} />
             <input onChange={handleEditChange} type="text" name="editDescription" id='editDescription' value={editInfo.editDescription} />
-            <button type='button' onClick={() => setEditMode({mode: false, id: null})}>Cancel</button>
-            <button type='submit'>Save</button>
+            <div className="btns">
+                <button type='button' onClick={() => setEditMode({mode: false, id: null, status: null})}>Cancel</button>
+                <button type='submit'>Save</button>
+            </div>
         </form>
-        {error && <p className="error">{error}</p>}
     </div>
     </>
   )
