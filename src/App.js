@@ -1,7 +1,7 @@
 import './App.scss';
-import Boards from './components/Boards';
+import {Boards} from './components/Boards';
 
-function App() {
+export function App() {
   return (
   <>
     <Boards/>
@@ -9,4 +9,3 @@ function App() {
   );
 }
 
-export default App;

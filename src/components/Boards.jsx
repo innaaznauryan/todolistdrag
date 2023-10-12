@@ -1,55 +1,37 @@
-import {useState} from "react"
+import {useEffect, useState} from "react"
 import {v4 as uuidv4} from 'uuid'
-import List from "./List"
+import {INITIALBOARDS, BOARDS, MAINBOARD} from "./globalVars"
+import {List} from "./List"
 import "./boards.scss"
 
-const INITIALBOARDS = [
-    {
-        id: uuidv4(),
-        name: "To do",
-        status: "to_do",
-        items: []
-    },
-    {
-        id: uuidv4(),
-        name: "In progress",
-        status: "in_progress",
-        items: []
-    },
-    {
-        id: uuidv4(),
-        name: "Completed",
-        status: "completed",
-        items: []
-    }
-]
-
-const Boards = () => {
-    const [currentId, setCurrentId] = useState(() => {
-        let ID
-        if(!localStorage.getItem("currentId")) {
-            ID = uuidv4()
-            localStorage.setItem("currentId", ID)
-        } else {
-            ID = localStorage.getItem("currentId")
-        }
-        return ID
-    })
-    const [boards, setBoards] = useState(() => {
-        let BOARDS
-        if (!localStorage.getItem("boards")) {
-            BOARDS = INITIALBOARDS
-            localStorage.setItem("boards", JSON.stringify(BOARDS))
-        } else {
-            BOARDS = JSON.parse(localStorage.getItem("boards"))
-        }
-        return BOARDS
-    })
-
+export const Boards = () => {
+    const [boards, setBoards] = useState(() => localStorage.boards ? JSON.parse(localStorage.boards) : INITIALBOARDS)
     const [error, setError] = useState(null)
 
+    useEffect(() => {
+        localStorage.setItem(BOARDS, JSON.stringify(boards))
+    }, [])
+
+    function formatText (string) {
+        return string
+            .replace(/\s+/g, " ")
+            .trim()
+            .split(" ")
+            .map((elem, index) => index === 0 ? elem[0].toUpperCase()+elem.slice(1).toLowerCase() : elem.toLowerCase())
+            .join(" ")
+    }
+
+    function formatTitle (string) {
+        return string
+            .replace(/[\\\s-_/.,]+/g, " ")
+            .trim()
+            .split(" ")
+            .map(elem => elem[0].toUpperCase()+elem.slice(1).toLowerCase())
+            .join(" ")
+    }
+
     function stringValidate (...strings) {
-        if(strings.some(string => !string.trim().replace(/\s+/g, " "))) {
+        if(strings.some(string => !string.replace(/\s+/g, " ").trim())) {
             setError("Please fill the form!")
             setTimeout(() => {
                 setError(null)
@@ -58,27 +40,30 @@ const Boards = () => {
         }
     }
 
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF'
+        let color = '#'
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)]
+        }
+        return color
+    }
+
     const addItem = (e) => {
         e.preventDefault()
         const {title, description} = e.target 
         try{
             stringValidate(title.value, description.value)
             const newItem = {
-                id: currentId,
-                ...Object.fromEntries([...new FormData(e.target)])
+                id: uuidv4(),
+                title: formatTitle(title.value),
+                description: formatText(description.value)
             }
-
-            setBoards(prev => {
-                return prev.map(board => board.status === "to_do" ? {...board, items: [...board.items,newItem]} : board)
-            })
-            localStorage.setItem("boards", JSON.stringify(((boards)=>{
-                return boards.map(board => board.status === "to_do" ? {...board, items: [...board.items,newItem]} : board)
-            })(boards)))
-
-            const newId = uuidv4()
-            localStorage.setItem("currentId", newId)
-            setCurrentId(newId)
-
+            const newBoards = (boards =>{
+                return boards.map(board => board.name === MAINBOARD ? {...board, items: [...board.items,newItem]} : board)
+            })(boards)
+            setBoards(newBoards)
+            localStorage.setItem(BOARDS, JSON.stringify(newBoards))
         } catch (error) {
             console.log(error)
         } finally {
@@ -88,27 +73,37 @@ const Boards = () => {
 
     const addBoard = (e) => {
         e.preventDefault()
-        const {status} = e.target
+        const {boardName} = e.target
         try {
-            stringValidate(status.value)
+            stringValidate(boardName.value)
             const newBoard = {
                 id: uuidv4(),
-                name: status.value,
-                status: status.value.split(" ").join("_").toLowerCase(),
+                name: formatTitle(boardName.value),
+                color: getRandomColor(),
                 items: []
             }
             setBoards(prev => [...prev, newBoard])
-            localStorage.setItem("boards", JSON.stringify((boards => [...boards, newBoard])(boards)))
+            localStorage.setItem(BOARDS, JSON.stringify((boards => [...boards, newBoard])(boards)))
         } catch (error) {
             console.log(error)
+        } finally {
+            e.target.reset()
         }
     }
 
   return (
 <>
     <div className="boards">
-        {boards.map(({id, name, status}) => {
-            return <List key={id} name={name} status={status} boards={boards} setBoards={setBoards} stringValidate={stringValidate} />
+        {boards.map(({id, name, color}) => {
+            return <List 
+                key={id}
+                boardId={id} 
+                name={name}
+                color={color}
+                boards={boards} 
+                setBoards={setBoards} 
+                stringValidate={stringValidate}
+            />
         })}
     </div>
     <form className="add-item" onSubmit={addItem}>
@@ -117,7 +112,7 @@ const Boards = () => {
         <button type="submit">Add Item</button>
     </form>
     <form className="add-board" onSubmit={addBoard}>
-        <input type="text" name="status" id="status" placeholder="Status" required />
+        <input type="text" name="boardName" id="boardName" placeholder="Status" required />
         <button type="submit">Add Board</button>
     </form>
 
@@ -125,5 +120,3 @@ const Boards = () => {
 </>
   )
 }
-
-export default Boards

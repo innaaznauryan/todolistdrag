@@ -1,3 +1,15 @@
+.borderName {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    svg {
+        transition: .5s;
+        &:hover{
+            color: darkcyan;
+            cursor: pointer;
+        }
+    }
+}
 .veil{
     background-color: rgba(0, 0, 0, 0.566);
     position: fixed;
@@ -22,7 +34,7 @@
     gap:10px;
     padding: 20px;
 }
-.delete{
+.deleteInfo{
     font-weight: 600;
 }
 .btns {
