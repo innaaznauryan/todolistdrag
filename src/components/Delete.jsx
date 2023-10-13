@@ -1,6 +1,13 @@
+import {memo} from "react"
 import {BOARDS} from "./globalVars"
 
-export const Delete = ({boards, setBoards, id, boardId, setDeleteMode}) => {
+export const Delete = memo(({
+  boards, 
+  setBoards, 
+  id, 
+  boardId, 
+  setDeleteMode
+}) => {
 
   const deleteItem = (id) => {
     try {
@@ -34,4 +41,4 @@ export const Delete = ({boards, setBoards, id, boardId, setDeleteMode}) => {
         </div>
     </>
   )
-}
+})

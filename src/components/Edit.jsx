@@ -1,8 +1,18 @@
-import {useState} from 'react'
-import {BOARDS} from "./globalVars"
+import {useState, memo} from 'react'
+import {BOARDS, EDITTITLE, EDITDESCRIPTION, EDITBOARD} from "./globalVars"
 import {InputEdit} from './InputEdit'
 
-export const Edit = ({boards, setBoards, id, boardId, toEdit, setEditMode, stringValidate}) => {
+export const Edit = memo(({
+    boards, 
+    setBoards, 
+    id, 
+    boardId, 
+    toEdit, 
+    setEditMode, 
+    stringValidate, 
+    formatText, 
+    formatTitle
+}) => {
     const [itemInfo, setItemInfo] = useState(() => {
         const itemToEdit = boards.find(board => board.id === boardId).items.find(item => item.id === id)
         return {
@@ -32,10 +42,10 @@ export const Edit = ({boards, setBoards, id, boardId, toEdit, setEditMode, strin
         e.preventDefault()
         switch(toEdit) {
             case "item":
-                editItem(id, e.target.editTitle.value, e.target.editDescription.value)
+                editItem(id, formatTitle(e.target.editTitle.value), formatText(e.target.editDescription.value))
                 break
             case "board":
-                editBoard(boardId, e.target.editBoard.value)
+                editBoard(boardId, formatTitle(e.target.editBoard.value))
                 break
         }
     }
@@ -79,11 +89,11 @@ export const Edit = ({boards, setBoards, id, boardId, toEdit, setEditMode, strin
         <form onSubmit={handleSubmit(toEdit)} className='flex'>
             {toEdit === "item" ?
                 <>
-                    <InputEdit toEdit={toEdit} valueType="editTitle" handleEditChange={handleEditChange} editInfo={itemInfo} />
-                    <InputEdit toEdit={toEdit} valueType="editDescription" handleEditChange={handleEditChange} editInfo={itemInfo} />
+                    <InputEdit toEdit={toEdit} valueType={EDITTITLE} handleEditChange={handleEditChange} editInfo={itemInfo} />
+                    <InputEdit toEdit={toEdit} valueType={EDITDESCRIPTION} handleEditChange={handleEditChange} editInfo={itemInfo} />
                 </>  
             :
-                <InputEdit toEdit={toEdit} valueType="editBoard" handleEditChange={handleEditChange} editInfo={boardInfo} />}
+                <InputEdit toEdit={toEdit} valueType={EDITBOARD} handleEditChange={handleEditChange} editInfo={boardInfo} />}
             
             <div className="btns">
                 <button type='button' onClick={() => setEditMode({mode: false, id: null, status: null})}>Cancel</button>
@@ -93,4 +103,4 @@ export const Edit = ({boards, setBoards, id, boardId, toEdit, setEditMode, strin
     </div>
     </>
   )
-}
+})

@@ -103,6 +103,8 @@ export const Boards = () => {
                 boards={boards} 
                 setBoards={setBoards} 
                 stringValidate={stringValidate}
+                formatText={formatText}
+                formatTitle={formatTitle}
             />
         })}
     </div>

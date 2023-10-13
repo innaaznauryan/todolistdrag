@@ -22,3 +22,6 @@ export const INITIALBOARDS = [
 ]
 export const BOARDS = "boards"
 export const MAINBOARD = "To do"
+export const EDITTITLE = "editTitle"
+export const EDITDESCRIPTION = "editDescription"
+export const EDITBOARD = "editBoard"

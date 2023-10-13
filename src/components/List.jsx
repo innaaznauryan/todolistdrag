@@ -1,4 +1,4 @@
-import {useState} from "react"
+import {useState, memo} from "react"
 import {AiFillDelete, AiFillEdit} from "react-icons/ai"
 import {BOARDS} from "./globalVars"
 import {Item} from "./Item"
@@ -6,7 +6,16 @@ import {Edit} from "./Edit"
 import {Delete} from "./Delete"
 import "./list.scss"
 
-export const List = ({boardId, name, color, boards, setBoards, stringValidate}) => {
+export const List = memo(({
+  boardId, 
+  name, 
+  color, 
+  boards, 
+  setBoards, 
+  stringValidate, 
+  formatText, 
+  formatTitle
+}) => {
 
   const [editMode, setEditMode] = useState({mode: false, id: null, boardId: null, toEdit: null})
   const [deleteMode, setDeleteMode] = useState({mode: false, id: null, boardId: null})
@@ -35,7 +44,7 @@ export const List = ({boardId, name, color, boards, setBoards, stringValidate}) 
       return boards.map(board => board.id === boardId ? {...board, items: board.items.filter(item => item.id !== draggableItem.id)} : board)
     })(boards)
     setBoards(newBoards)
-    localStorage.setItem("boards", JSON.stringify(newBoards))
+    localStorage.setItem(BOARDS, JSON.stringify(newBoards))
     }
   }
 
@@ -93,7 +102,9 @@ export const List = ({boardId, name, color, boards, setBoards, stringValidate}) 
         boardId={editMode.boardId}
         toEdit={editMode.toEdit}
         setEditMode={setEditMode} 
-        stringValidate={stringValidate} />}
+        stringValidate={stringValidate}
+        formatText={formatText}
+        formatTitle={formatTitle} />}
       {deleteMode.mode && <Delete 
         boards={boards} 
         setBoards={setBoards} 
@@ -102,4 +113,4 @@ export const List = ({boardId, name, color, boards, setBoards, stringValidate}) 
         setDeleteMode={setDeleteMode} />}
     </>
   )
-}
+})
