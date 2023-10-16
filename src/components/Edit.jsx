@@ -44,10 +44,10 @@ export const Edit = memo(({
         e.preventDefault()
         switch(toEdit) {
             case "item":
-                editItem(id, formatTitle(e.target.editTitle.value), formatText(e.target.editDescription.value))
+                editItem(id, e.target.editTitle.value, e.target.editDescription.value)
                 break
             case "board":
-                editBoard(boardId, formatTitle(e.target.editBoard.value))
+                editBoard(boardId, e.target.editBoard.value)
                 break
             default:
                 break
@@ -57,7 +57,7 @@ export const Edit = memo(({
     const editItem = (id, title, description) => {
         try {
             stringValidate(id, title, description)
-            const updatedItem = {id, title, description}
+            const updatedItem = {id, title: formatTitle(title), description: formatText(description)}
             const newBoards = (boards => {
                 return boards.map(board => board.id === boardId ? {...board, items: board.items.map(item => item.id === id ? updatedItem : item)} : board)
               })(boards)
@@ -74,7 +74,7 @@ export const Edit = memo(({
         try {
             stringValidate(boardId, name)
             const newBoards = (boards => {
-                return boards.map(board => board.id === boardId ? {...board, name} : board)
+                return boards.map(board => board.id === boardId ? {...board, name: formatTitle(name)} : board)
             })(boards)
             setBoards(newBoards)
             localStorage.setItem(BOARDS, JSON.stringify(newBoards))

@@ -38,6 +38,8 @@
     font-weight: 600;
 }
 .btns {
+    display: flex;
+    flex-wrap: nowrap;
     button {
         background-color: darkcyan;
         padding: 10px;

@@ -35,6 +35,7 @@ form{
     }
     button{
         background-color: darkcyan;
+        padding: 10px;
         &:hover{
             cursor: pointer;
         }
@@ -48,4 +49,11 @@ form{
     color: red;
     text-align: center;
     height: 40px;
+}
+
+@media (max-width: 600px) {
+    form {
+        display: flex;
+        flex-direction: column;
+    }
 }
