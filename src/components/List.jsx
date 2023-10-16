@@ -9,17 +9,21 @@ import "./list.scss"
 export const List = memo(({
   boardId, 
   name, 
-  color, 
+  color,
+  items,
   boards, 
   setBoards, 
   stringValidate, 
   formatText, 
-  formatTitle
+  formatTitle,
+  draggableItem,
+  setDraggableItem,
+  sourceBoardId,
+  setSourceBoardId
 }) => {
 
   const [editMode, setEditMode] = useState({mode: false, id: null, boardId: null, toEdit: null})
   const [deleteMode, setDeleteMode] = useState({mode: false, id: null, boardId: null})
-  const [draggableItem, setDraggableItem] = useState(() => localStorage.draggableItem ? JSON.parse(localStorage.draggableItem) : null)
   const [focused, setFocused] = useState(false)
 
   const allowDrop = e => {
@@ -28,11 +32,17 @@ export const List = memo(({
     }
   }
 
-  const handleDrop = (e) => {
+  const handleDrop = () => {
     setFocused(false)
-    const newBoards = (boards => {
-      return boards.map(board => board.id === boardId ? {...board, items: [...board.items, draggableItem]} : board)
-    })(boards)
+    const newBoards = (boards => boards.map(board => {
+      if(board.id === sourceBoardId) {
+        return {...board, items: board.items.filter(item => item.id !== draggableItem.id)}
+      } else if (board.id === boardId) {
+        return {...board, items: [...board.items, draggableItem]}
+      } else {
+        return board
+      }
+    }))(boards)
     setBoards(newBoards)
     localStorage.setItem(BOARDS, JSON.stringify(newBoards))
   }
@@ -40,11 +50,6 @@ export const List = memo(({
   const handleDragEnter = e => {
     if(e.target === e.currentTarget) {
     setFocused(true)
-    const newBoards = (boards => {
-      return boards.map(board => board.id === boardId ? {...board, items: board.items.filter(item => item.id !== draggableItem.id)} : board)
-    })(boards)
-    setBoards(newBoards)
-    localStorage.setItem(BOARDS, JSON.stringify(newBoards))
     }
   }
 
@@ -77,9 +82,7 @@ export const List = memo(({
             <AiFillDelete onClick={deleteBoard} />
           </div>
         
-        {boards
-        .find(board => board.id === boardId)
-        .items
+        {items
         .map(({id, title, description}) => {
               return <Item 
                 key={id} 
@@ -88,8 +91,10 @@ export const List = memo(({
                 description={description} 
                 boardId={boardId} 
                 setEditMode={setEditMode} 
-                setDeleteMode={setDeleteMode} 
+                setDeleteMode={setDeleteMode}
+                draggableItem={draggableItem}
                 setDraggableItem={setDraggableItem}
+                setSourceBoardId={setSourceBoardId}
               />
             })
         }

@@ -9,18 +9,13 @@ export const Item = memo(({
   boardId, 
   setEditMode, 
   setDeleteMode, 
-  setDraggableItem
+  setDraggableItem,
+  setSourceBoardId
 }) => {
 
   const handleDragStart = () => {
-    const draggableItem = {id, title, description}
-    setDraggableItem(draggableItem)
-    localStorage.setItem("draggableItem", JSON.stringify(draggableItem))
-  }
-
-  const handleDragEnd = () => {
-    // setDraggableItem(null)
-    // localStorage.removeItem("draggableItem")
+    setDraggableItem({id, title, description})
+    setSourceBoardId(boardId)
   }
 
   return (
@@ -28,8 +23,7 @@ export const Item = memo(({
     data-id={id} 
     className="item" 
     draggable 
-    onDragStart={handleDragStart} 
-    onDragEnd={handleDragEnd} >
+    onDragStart={handleDragStart} >
       <h3>{title}</h3>
       <p>{description}</p>
       <div className="controls">

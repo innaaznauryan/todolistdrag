@@ -35,6 +35,8 @@ export const Edit = memo(({
             case "board":
                 setBoardInfo({...boardInfo, [e.target.name]: e.target.value})
                 break
+            default:
+                break
         }
     }
 
@@ -46,6 +48,8 @@ export const Edit = memo(({
                 break
             case "board":
                 editBoard(boardId, formatTitle(e.target.editBoard.value))
+                break
+            default:
                 break
         }
     }

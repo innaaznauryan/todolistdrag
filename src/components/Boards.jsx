@@ -7,9 +7,12 @@ import "./boards.scss"
 export const Boards = () => {
     const [boards, setBoards] = useState(() => localStorage.boards ? JSON.parse(localStorage.boards) : INITIALBOARDS)
     const [error, setError] = useState(null)
+    const [draggableItem, setDraggableItem] = useState(null)
+    const [sourceBoardId, setSourceBoardId] = useState(null)
 
     useEffect(() => {
         localStorage.setItem(BOARDS, JSON.stringify(boards))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     function formatText (string) {
@@ -94,17 +97,22 @@ export const Boards = () => {
   return (
 <>
     <div className="boards">
-        {boards.map(({id, name, color}) => {
+        {boards.map(({id, name, color, items}) => {
             return <List 
                 key={id}
                 boardId={id} 
                 name={name}
                 color={color}
+                items={items}
                 boards={boards} 
                 setBoards={setBoards} 
                 stringValidate={stringValidate}
                 formatText={formatText}
                 formatTitle={formatTitle}
+                draggableItem={draggableItem}
+                setDraggableItem={setDraggableItem}
+                sourceBoardId={sourceBoardId}
+                setSourceBoardId={setSourceBoardId}
             />
         })}
     </div>
